@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mapa con Cuadrículas y Análisis</title>
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+
+  <style>
+    #map {
+      height: 600px;
+      width: 100%;
+    }
+    .percentage-label {
+      font-size: 14px;
+      color: #000;
+      background: rgba(255, 255, 255, 0.7);
+      padding: 3px;
+      border-radius: 5px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <h1>Mapa con Cuadrículas y Análisis</h1>
+
+  <div id="map"></div>
+  <button id="analyze-grid">Analizar Cuadrículas</button>
+
+  <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+
+  <script>
+    var map = L.map('map').setView([19.0413, -98.2062], 14); // Coordenadas de Puebla
+    var googleSatLayer = L.tileLayer('https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+      attribution: 'Map data ©2024 Google',
+      maxZoom: 20
+    });
+    googleSatLayer.addTo(map);
+
+    var gridLayer;
+
+    // Función para dibujar cuadrículas
+    function addGrid() {
+      gridLayer = L.layerGroup();
+      var step = 0.01;  // Tamaño de las cuadrículas en grados
+
+      var bounds = map.getBounds();
+      var southWest = bounds.getSouthWest();
+      var northEast = bounds.getNorthEast();
+
+      for (var lat = Math.floor(southWest.lat / step) * step; lat < northEast.lat; lat += step) {
+        for (var lng = Math.floor(southWest.lng / step) * step; lng < northEast.lng; lng += step) {
+          var rect = L.rectangle([[lat, lng], [lat + step, lng + step]], {
+            color: "#ff7800", weight: 1, fillOpacity: 0.0 // Opacidad inicial en 0
+          });
+          rect.addTo(gridLayer);
+        }
+      }
+      gridLayer.addTo(map);
+    }
+
+    // Función para analizar cada cuadrícula
+    function analyzeGrid() {
+      var rectangles = [];
+      gridLayer.eachLayer(function(layer) {
+        if (layer instanceof L.Rectangle) {
+          rectangles.push(layer);
+        }
+      });
+
+      rectangles.forEach(function(rect) {
+        var bounds = rect.getBounds();
+        var center = bounds.getCenter();
+        var lat = center.lat;
+        var lng = center.lng;
+
+        fetch('/process_tile', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            lat: lat,
+            lng: lng,
+            zoom: 18 // Zoom level para descargar los tiles
+          })
+        })
+        .then(response => response.json())
+        .then(data => {
+          var porcentaje = data.porcentaje_vegetacion;
+
+          // Establecer el color basado en el porcentaje de vegetación
+          if (porcentaje > 20) {
+            rect.setStyle({color: 'green', fillOpacity: 0.5});  // Verde para más del 50%
+          } else if (porcentaje > 10) {
+            rect.setStyle({color: 'yellow', fillOpacity: 0.5}); // Amarillo entre 20% y 50%
+          } else {
+            rect.setStyle({color: 'red', fillOpacity: 0.5});    // Rojo para menos del 20%
+          }
+
+          // Añadir el porcentaje sobre la cuadrícula
+          var percentageLabel = L.marker(rect.getBounds().getCenter(), {
+            icon: L.divIcon({
+              className: 'percentage-label',
+              html: `${porcentaje.toFixed(2)}%`
+            })
+          }).addTo(gridLayer);
+        })
+        .catch(error => {
+          console.error('Error al analizar la cuadrícula:', error);
+        });
+      });
+    }
+
+    // Añadir cuadrículas al mapa
+    addGrid();
+
+    // Analizar cuadrículas al hacer clic en el botón
+    document.getElementById('analyze-grid').addEventListener('click', analyzeGrid);
+
+    // Redibujar cuadrículas al mover o hacer zoom en el mapa
+    map.on('moveend', function() {
+      map.removeLayer(gridLayer);
+      addGrid();
+    });
+  </script>
+</body>
+</html>

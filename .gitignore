@@ -1,0 +1,33 @@
+# Ignorar la carpeta del entorno virtual
+venv/
+ENV/
+env/
+.venv/
+.VENV/
+
+# Ignorar imágenes PNG
+*.png
+
+# Ignorar archivos temporales o de configuración de sistemas operativos
+*.DS_Store
+Thumbs.db
+
+# Ignorar archivos de configuración de IDEs
+.vscode/
+.idea/
+
+# Ignorar archivos compilados de Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Ignorar archivos de log y caché
+*.log
+*.cache
+*.bak
+*.swp
+
+# Ignorar archivos de configuración específicos del sistema
+*.env
+.env
+*.local
