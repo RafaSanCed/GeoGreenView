@@ -138,7 +138,9 @@ input[type="range"] {
     // Function to draw grid
     function addGrid() {
       gridLayer = L.layerGroup();
-      var step = 0.01;
+      var zoom = 13
+      var step = (zoom >= 17) ? 0.001 : (zoom >= 15) ? 0.005 : 0.009;
+      //var step = 0.01;
 
       var bounds = map.getBounds();
       var southWest = bounds.getSouthWest();
@@ -187,7 +189,7 @@ input[type="range"] {
           body: JSON.stringify({
             lat: lat,
             lng: lng,
-            zoom: 18
+            zoom: 13
           })
         })
         .then(response => response.json())
