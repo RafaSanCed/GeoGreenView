@@ -2,13 +2,30 @@ body {
   font-family: Arial, sans-serif;
   margin: 0;
   padding: 0;
+  background-color: rgba(0, 0, 0, 0.1);
+  color: black;
   text-align: center;
+}
+
+/* Flexbox container for map and controls */
+.container {
+  display: flex;  /* Activate flexbox */
+  justify-content: space-between;  /* Space between map and controls */
+  padding: 20px;
 }
 
 #map {
   height: 500px;
-  width: 80%;
-  margin: 20px auto;
+  width: 75%;  /* 75% of the width for the map */
+  margin-right: 20px;  /* Add space between map and controls */
+  border: 2px solid #333;
+}
+
+#controls {
+  width: 25%;  /* 25% of the width for controls */
+  text-align: left;
+  padding: 10px;
+  box-sizing: border-box;
 }
 
 button {
@@ -17,9 +34,33 @@ button {
   color: white;
   border: none;
   cursor: pointer;
-  margin-top: 20px;
+  margin-bottom: 20px;
 }
 
 button:hover {
   background-color: #45a049;
+}
+
+/* Slider for opacity control */
+input[type="range"] {
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+/* Legend styling */
+#legend {
+  font-size: 14px;
+  color: black;
+  background: rgba(255, 255, 255, 0.7);
+  padding: 10px;
+  border-radius: 5px;
+  text-align: justify;  /* Justify text inside the legend */
+}
+
+#legend i {
+  width: 18px;
+  height: 18px;
+  float: left;
+  margin-right: 8px;
+  opacity: 0.7;
 }
