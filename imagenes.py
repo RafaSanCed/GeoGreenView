@@ -22,13 +22,32 @@ def latlng_to_tile(lat, lng, zoom):
     return x, y
 
 # Función para descargar el mosaico (tile) desde Google Maps
+# Actualmente, si el usuario solicita el mismo mosaico varias veces, la app lo descarga
+# Esto podría ser ineficiente a largo plazo, así que intentaremos implementar una caché para
+# almacenar y reutilizar los mosaicos de las coordenadas ya utilizadas
+
 def download_google_tile(x, y, z, filename):
+
+    # Verificamos si el archivo ya existe en caché
+
+    if os.path.exists(filename):
+
+        print(f"Tile {filename} encontrado en caché.")
+
+        return
+    
     url = f"https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}"
+
     response = requests.get(url)
+
     if response.status_code == 200:
+
         with open(filename, 'wb') as file:
+
             file.write(response.content)
+
     else:
+
         raise Exception(f"Error al descargar el tile. Código de estado: {response.status_code}")
 
 # Función para eliminar todas las imágenes de la carpeta
@@ -38,27 +57,46 @@ def limpiar_carpeta_imagenes():
     os.makedirs(IMAGES_FOLDER)
 
 # Función para calcular el porcentaje de vegetación en la imagen
+"""
+Esta función utiliza rangos HSV establecidos previamente para los colores verdes. Como se ha visto en pruebas
+esto puede estar ocasionando que se obtengan resultados no tan precisos en distintos mosaicos que si contienen
+vegetación. Proponemos ajustar estos rangos de manera dinámica. 
+"""
+
 def calcular_porcentaje_vegetacion(image_path):
     image = cv2.imread(image_path)
     hsv_image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
 
-    # Rango de colores verdes en el espacio HSV
-    rango_verde_claro = np.array([35, 50, 80], np.uint8)
-    rango_verde_claro_oscuro = np.array([85, 255, 255], np.uint8)
-    rango_verde_oscuro = np.array([0, 0, 0], np.uint8)
-    rango_verde_oscuro_alto = np.array([85, 255, 80], np.uint8)
+    # Calcula el histograma del canal de saturación (hue o H)
+    hue_hist = cv2.calcHist([hsv_image], [0], None, [155], [0, 155])
 
-    # Máscaras de color verde
-    mascara_verde_claro = cv2.inRange(hsv_image, rango_verde_claro, rango_verde_claro_oscuro)
-    mascara_verde_oscuro = cv2.inRange(hsv_image, rango_verde_oscuro, rango_verde_oscuro_alto)
+    # Encontramos el pico en el histograma que corresponde a los valores de verde
+    green_hue_range = (80, 155)
+    green_hist_peak = np.argmax(hue_hist[green_hue_range[0]:green_hue_range[1]]) + green_hue_range[0]
 
-    # Combinar las máscaras
-    mascara_vegetacion = cv2.bitwise_or(mascara_verde_claro, mascara_verde_oscuro)
+    # Ajustamos los rangos de forma dinámica basados en el pico detectado
+    hue_min = max(green_hist_peak - 10, 0)
+    hue_max = min(green_hist_peak + 10, 140)
 
-    # Calcular el porcentaje de vegetación
+    # Se calcula la mediana para la saturación (S) y el valor (V) para reducir la sensibilidad al ruido
+    sat_median = np.median(hsv_image[:, :, 1])
+    val_median = np.median(hsv_image[:, :, 2])
+
+    # Ajustamos los rangos alrededor de la mediana, con algunos márgenes
+    saturation_min = max(sat_median - 25, 0)
+    saturation_max = min(sat_median + 25, 255)
+    value_min = max(val_median - 25, 0)
+    value_max = min(val_median + 25, 255)
+
+    # Creamos la máscara para la vegetación basados en los rangos HSV ajustados
+    mask = cv2.inRange(hsv_image, 
+                       np.array([hue_min, saturation_min, value_min], np.uint8), 
+                       np.array([hue_max, saturation_max, value_max], np.uint8))
+
+    # Calculamos el porcentaje de vegetación
     total_pixels = image.shape[0] * image.shape[1]
-    vegetacion_pixels = np.sum(mascara_vegetacion > 0)
-    porcentaje_vegetacion = (vegetacion_pixels / total_pixels) * 100
+    vegetation_pixels = np.sum(mask > 0)
+    porcentaje_vegetacion = (vegetation_pixels / total_pixels) * 100
 
     return porcentaje_vegetacion
 

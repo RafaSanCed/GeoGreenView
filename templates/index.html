@@ -8,30 +8,111 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
 
   <style>
-    #map {
-      height: 600px;
-      width: 100%;
-    }
-    .percentage-label {
-      font-size: 14px;
-      color: #000;
-      background: rgba(255, 255, 255, 0.7);
-      padding: 3px;
-      border-radius: 5px;
-      text-align: center;
-    }
+  body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: rgba(0, 0, 0, 0.1);
+  color: black;
+  text-align: center;
+}
+
+/* Flexbox container for map and controls */
+.container {
+  display: flex;  /* Activate flexbox */
+  justify-content: space-between;  /* Space between map and controls */
+  padding: 20px;
+}
+
+#map {
+  height: 500px;
+  width: 75%;  /* 75% of the width for the map */
+  margin-right: 20px;  /* Add space between map and controls */
+  border: 2px solid #333;
+}
+
+#controls {
+  width: 25%;  /* 25% of the width for controls */
+  text-align: left;
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+button {
+  padding: 10px 20px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  cursor: pointer;
+  margin-bottom: 20px;
+}
+
+button:hover {
+  background-color: #45a049;
+}
+
+/* Slider for opacity control */
+label[for="opacityRange"] {
+  display: block; /* Ensure label is on a new line */
+  margin-top: 20px; /* Space between button and slider */
+}
+
+/* Slider for opacity control */
+input[type="range"] {
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+/* Legend styling */
+#legend {
+  font-size: 14px;
+  color: black;
+  background: rgba(255, 255, 255, 0.7);
+  padding: 10px;
+  border-radius: 5px;
+}
+
+#legend i {
+  width: 18px;
+  height: 18px;
+  float: left;
+  margin-right: 8px;
+  opacity: 0.7;
+  display: inline-block; /* Ensure icons are aligned left */
+}
   </style>
 </head>
 <body>
-  <h1>Mapa con Cuadrículas y Análisis</h1>
+  <h1 style="text-align: center;">Análisis del porcentaje de áreas verdes en la ciudad de Puebla, México</h1>
 
-  <div id="map"></div>
-  <button id="analyze-grid">Analizar Cuadrículas</button>
+    <div class = "container">
+      <div id="map"></div>
+      <div id="controls">
+        <button id="analyze-grid">Analizar Cuadrículas</button>
+    
+        <!-- Opacity Slider -->
+        <label for="opacityRange">Opacidad: </label>
+        <input type="range" id="opacityRange" min="0" max="100" value="10">
+    
+        <!-- Legend for Vegetation Levels -->
+        <div id="legend">
+        <h4>Niveles de vegetación</h4>
+        <i style="background: red;"></i> Bajo (0-10%)<br>
+        <i style="background: orange;"></i> Medio-Bajo (10-20%)<br>
+        <i style="background: yellow;"></i> Medio (20-30%)<br>
+        <i style="background: yellowgreen;"></i> Medio-Alto (30-50%)<br>
+        <i style="background: green;"></i> Alto (50-100%)<br>
+      </div>
+      </div>
+    </div>
 
+  
+  
+  
   <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
 
   <script>
-    var map = L.map('map').setView([19.0413, -98.2062], 14); // Coordenadas de Puebla
+    var map = L.map('map').setView([19.0413, -98.2062], 14); // Puebla coordinates
     var googleSatLayer = L.tileLayer('https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
       attribution: 'Map data ©2024 Google',
       maxZoom: 20
@@ -39,11 +120,25 @@
     googleSatLayer.addTo(map);
 
     var gridLayer;
+    var currentOpacity = 0.1;  // Initial opacity value from slider
 
-    // Función para dibujar cuadrículas
+    // Get the opacity slider element
+    var opacitySlider = document.getElementById('opacityRange');
+
+    // Listen for slider value changes
+    opacitySlider.addEventListener('input', function() {
+      currentOpacity = opacitySlider.value / 100;
+      gridLayer.eachLayer(function(layer) {
+        if (layer instanceof L.Rectangle) {
+          layer.setStyle({fillOpacity: currentOpacity});
+        }
+      });
+    });
+
+    // Function to draw grid
     function addGrid() {
       gridLayer = L.layerGroup();
-      var step = 0.01;  // Tamaño de las cuadrículas en grados
+      var step = 0.01;
 
       var bounds = map.getBounds();
       var southWest = bounds.getSouthWest();
@@ -52,7 +147,7 @@
       for (var lat = Math.floor(southWest.lat / step) * step; lat < northEast.lat; lat += step) {
         for (var lng = Math.floor(southWest.lng / step) * step; lng < northEast.lng; lng += step) {
           var rect = L.rectangle([[lat, lng], [lat + step, lng + step]], {
-            color: "#ff7800", weight: 1, fillOpacity: 0.0 // Opacidad inicial en 0
+            color: "#ff7800", weight: 1, fillOpacity: currentOpacity
           });
           rect.addTo(gridLayer);
         }
@@ -60,7 +155,16 @@
       gridLayer.addTo(map);
     }
 
-    // Función para analizar cada cuadrícula
+    // Function to get color based on vegetation percentage
+    function getVegetationColor(porcentaje) {
+      return porcentaje > 50 ? 'green' :
+             porcentaje > 30 ? 'yellowgreen' :
+             porcentaje > 20 ? 'yellow' :
+             porcentaje > 10 ? 'orange' :
+             'red';
+    }
+
+    // Function to analyze each grid cell
     function analyzeGrid() {
       var rectangles = [];
       gridLayer.eachLayer(function(layer) {
@@ -83,23 +187,20 @@
           body: JSON.stringify({
             lat: lat,
             lng: lng,
-            zoom: 18 // Zoom level para descargar los tiles
+            zoom: 18
           })
         })
         .then(response => response.json())
         .then(data => {
           var porcentaje = data.porcentaje_vegetacion;
 
-          // Establecer el color basado en el porcentaje de vegetación
-          if (porcentaje > 20) {
-            rect.setStyle({color: 'green', fillOpacity: 0.5});  // Verde para más del 50%
-          } else if (porcentaje > 10) {
-            rect.setStyle({color: 'yellow', fillOpacity: 0.5}); // Amarillo entre 20% y 50%
-          } else {
-            rect.setStyle({color: 'red', fillOpacity: 0.5});    // Rojo para menos del 20%
-          }
+          // Set the rectangle color and opacity based on vegetation percentage
+          rect.setStyle({
+            color: getVegetationColor(porcentaje),
+            fillOpacity: currentOpacity
+          });
 
-          // Añadir el porcentaje sobre la cuadrícula
+          // Add the percentage label on the grid
           var percentageLabel = L.marker(rect.getBounds().getCenter(), {
             icon: L.divIcon({
               className: 'percentage-label',
@@ -113,13 +214,13 @@
       });
     }
 
-    // Añadir cuadrículas al mapa
+    // Add grid to map
     addGrid();
 
-    // Analizar cuadrículas al hacer clic en el botón
+    // Analyze grid on button click
     document.getElementById('analyze-grid').addEventListener('click', analyzeGrid);
 
-    // Redibujar cuadrículas al mover o hacer zoom en el mapa
+    // Redraw grid on map movement or zoom
     map.on('moveend', function() {
       map.removeLayer(gridLayer);
       addGrid();
