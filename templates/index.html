@@ -30,6 +30,14 @@
   margin-right: 20px;  /* Add space between map and controls */
   border: 2px solid #333;
 }
+#map2 {
+  margin-top: 1.5rem;
+  height: 500px;
+  width: 75%;  /* 75% of the width for the map */
+  margin-right: 20px;  /* Add space between map and controls */
+  border: 2px solid #333;
+}
+
 
 #controls {
   width: 25%;  /* 25% of the width for controls */
@@ -85,7 +93,7 @@ input[type="range"] {
   </style>
 </head>
 <body>
-  <h1 style="text-align: center;">Análisis del porcentaje de áreas verdes en la ciudad de Puebla, México y su contraste con ciudades Europeas.</h1>
+  <h1 style="text-align: center;">Análisis del porcentaje de áreas verdes en la ciudad de Puebla, México y su contraste Copenhague, Dinamarca.</h1>
 
     <div class = "container">
       <div class="w-full">
@@ -138,7 +146,7 @@ input[type="range"] {
       });
     });
 
-    let map2 = L.map('map2').setView([55.664462, 12.585317], 14); // London coordinates
+    let map2 = L.map('map2').setView([55.664462, 12.585317], 14); //  Copenhague coordinates
     let googleSatLayer2 = L.tileLayer('https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
       attribution: 'Map data ©2024 Google',
       maxZoom: 20
@@ -326,6 +334,10 @@ input[type="range"] {
     map.on('moveend', function() {
       map.removeLayer(gridLayer);
       addGrid();
+    });
+    map2.on('moveend', function() {
+      map2.removeLayer(gridLayer2);
+      addGrid2();
     });
   </script>
 </body>

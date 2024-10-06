@@ -21,13 +21,6 @@ body {
   margin-right: 20px;  /* Add space between map and controls */
   border: 2px solid #333;
 }
-#map2 {
-  height: 500px;
-  width: 75%;  /* 75% of the width for the map */
-  margin-right: 20px;  /* Add space between map and controls */
-  border: 2px solid #333;
-}
-
 
 
 #controls {
