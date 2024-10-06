@@ -1,344 +1,350 @@
 <!DOCTYPE html>
 <html lang="es">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mapa con Cuadrículas y Análisis</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mapa con Cuadrículas y Análisis</title>
 
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+    />
 
-  <style>
-  body {
-  font-family: Arial, sans-serif;
-  margin: 0;
-  padding: 0;
-  background-color: rgba(0, 0, 0, 0.1);
-  color: black;
-  text-align: center;
-}
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0 auto;
+        padding: 0;
+        background-color: #f4f4f4;
+        color: #333;
+        text-align: center;
+      }
 
-/* Flexbox container for map and controls */
-.container {
-  display: flex;  /* Activate flexbox */
-  justify-content: space-between;  /* Space between map and controls */
-  padding: 20px;
-}
+      h1 {
+        margin: 20px 0;
+        color: #2c3e50;
+      }
 
-#map {
-  height: 500px;
-  width: 75%;  /* 75% of the width for the map */
-  margin-right: 20px;  /* Add space between map and controls */
-  border: 2px solid #333;
-}
-#map2 {
-  margin-top: 1.5rem;
-  height: 500px;
-  width: 75%;  /* 75% of the width for the map */
-  margin-right: 20px;  /* Add space between map and controls */
-  border: 2px solid #333;
-}
+      /* Navbar styling */
+      nav {
+        background-color: #2980b9;
+        padding: 10px 20px;
+        color: white;
+        text-align: center;
+      }
 
+      /* Flexbox container for map and controls */
+      .container {
+        display: flex;
+        gap: 20px;
+        justify-content: space-between;
+        padding: 20px;
+        margin: 0 auto;
+        width: 80%;
+        flex-wrap: wrap;
+      }
 
-#controls {
-  width: 25%;  /* 25% of the width for controls */
-  text-align: left;
-  padding: 10px;
-  box-sizing: border-box;
-}
-.w-full {
-  width: 100%;
-}
-button {
-  padding: 10px 20px;
-  background-color: #4CAF50;
-  color: white;
-  border: none;
-  cursor: pointer;
-  margin-bottom: 20px;
-}
+      #controls {
+        width: 25%;
+        text-align: left;
+        padding: 20px;
+        box-sizing: border-box;
+        border-radius: 8px;
+        background-color: white; /* Background for controls */
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      }
 
-button:hover {
-  background-color: #45a049;
-}
+      button {
+        padding: 10px 20px;
+        background-color: #27ae60;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        margin-bottom: 20px;
+        transition: background-color 0.3s ease;
+      }
 
-/* Slider for opacity control */
-label[for="opacityRange"] {
-  display: block; /* Ensure label is on a new line */
-  margin-top: 20px; /* Space between button and slider */
-}
+      button:hover {
+        background-color: #219150;
+      }
 
-/* Slider for opacity control */
-input[type="range"] {
-  width: 100%;
-  margin-bottom: 20px;
-}
+      label[for="opacityRange"] {
+        display: block;
+        margin-top: 20px;
+      }
 
-/* Legend styling */
-#legend {
-  font-size: 14px;
-  color: black;
-  background: rgba(255, 255, 255, 0.7);
-  padding: 10px;
-  border-radius: 5px;
-}
+      input[type="range"] {
+        width: 100%;
+        margin-bottom: 20px;
+      }
 
-#legend i {
-  width: 18px;
-  height: 18px;
-  float: left;
-  margin-right: 8px;
-  opacity: 0.7;
-  display: inline-block; /* Ensure icons are aligned left */
-}
-  </style>
-</head>
-<body>
-  <h1 style="text-align: center;">Análisis del porcentaje de áreas verdes en la ciudad de Puebla, México y su contraste Copenhague, Dinamarca.</h1>
+      /* Legend styling */
+      #legend {
+        font-size: 14px;
+        background: rgba(255, 255, 255, 0.8);
+        padding: 10px;
+        border-radius: 5px;
+      }
 
-    <div class = "container">
-      <div class="w-full">
+      #legend i {
+        width: 18px;
+        height: 18px;
+        margin-right: 8px;
+        opacity: 0.7;
+        display: inline-block;
+      }
 
-        <div id="map"></div>
-        <div id="map2"></div>
-      </div>
+      #map {
+        height: 500px;
+        width: 70%; /* 75% of the width for the map */
+        margin-right: 20px; /* Add space between map and controls */
+        border: 2px solid #d3d3d3;
+        border-radius: 2rem;
+      }
+      .w-full {
+        width: 100%;
+      }
+
+      .percentage-label {
+        padding: 2px;
+        background-color: rgba(255, 255, 255, 0.5);
+        width: fit-content!important;
+        border-radius: 5px;
+        color: black;
+        font-weight: bold;
+        text-align: center;
+      }
+      .simple-bar {
+        background-color: white;
+        /* color: white; */
+        padding-top: 10px;
+        padding-bottom: 10px;
+        text-align: center;
+        border-bottom: 1px solid #d3d3d3;
+      }
+
+      .card {
+        width: 100%;
+        text-align: left;
+        background-color: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="w-full simple-bar">
+      <h1 style="text-align: center">
+        Análisis del porcentaje de áreas verdes en la ciudad de Puebla, México.
+      </h1>
+    </div>
+
+    <div class="container">
+      <div id="map"></div>
       <div id="controls">
         <button id="analyze-grid">Analizar Cuadrículas</button>
-    
+
         <!-- Opacity Slider -->
         <label for="opacityRange">Opacidad: </label>
-        <input type="range" id="opacityRange" min="0" max="100" value="10">
-    
+        <input type="range" id="opacityRange" min="10" max="100" value="10" />
+
         <!-- Legend for Vegetation Levels -->
         <div id="legend">
-        <h4>Niveles de vegetación</h4>
-        <i style="background: red;"></i> Bajo (0-10%)<br>
-        <i style="background: orange;"></i> Medio-Bajo (10-20%)<br>
-        <i style="background: yellow;"></i> Medio (20-30%)<br>
-        <i style="background: yellowgreen;"></i> Medio-Alto (30-50%)<br>
-        <i style="background: green;"></i> Alto (50-100%)<br>
+          <h4>Niveles de vegetación</h4>
+          <i style="background: red"></i> <b>Bajo</b> (0-10%)<br />
+          <i style="background: orange"></i>
+          <b>Medio-Bajo</b>
+          (10-20%)<br />
+          <i style="background: yellow"></i> <b>Medio</b> (20-30%)<br />
+          <i style="background: yellowgreen"></i
+          ><b>Medio-Alto</b> (30-50%)<br />
+          <i style="background: green"></i><b>Alto</b> (50-100%)<br />
+        </div>
       </div>
+    </div>
+    <div class="container">
+      <div class="card">
+        <h2>Lorem Ipsum</h2>
+
+        <h3>Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit</h3>
+        <p>
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis elit massa, sodales non varius et, lobortis sit amet diam. Mauris diam felis, posuere nec leo nec, sodales fringilla metus. Vestibulum ut pretium eros. Nulla sed ex ut ligula imperdiet pharetra. Donec volutpat erat sit amet laoreet suscipit. Aliquam erat volutpat. Praesent feugiat metus a nulla lobortis dapibus. In mollis ultrices mattis. Nulla a orci ac leo commodo venenatis. Orci varius natoque penatibus et magnis dis parturient montes, <strong>nascetur ridiculus mus. Nunc sed elit laoreet, euismod leo a, viverra quam</strong>.
+        </p>
+        <h3>Porcentaje de áreas verdes por cuadrícula</h3>
+        <p>
+          Mauris ac nisi auctor, malesuada sem ac, tincidunt justo. Pellentesque sem magna, laoreet quis ultrices non, auctor sed neque. Proin dui lacus, placerat eget maximus in, tempor vitae risus. Nullam blandit ut mauris et luctus. Nam egestas consequat neque, quis scelerisque elit sollicitudin in. Cras vestibulum vehicula interdum. Vivamus molestie magna sem, sit amet accumsan diam consequat eu. Curabitur sed mauris et lorem dignissim <strong>semper in sit amet orci</strong>. Morbi dolor libero, euismod nec efficitur eu, rutrum nec ipsum. <strong>Suspendisse suscipit in orci</strong> in lobortis. Duis est sem, mattis sed fermentum vitae, gravida placerat lorem. Quisque vehicula lobortis felis ac interdum. Praesent lectus mauris, posuere vel tellus non, egestas pulvinar nulla.
+        </p>
       </div>
-    </div>  
-  
-  <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+      <div class="card">
+        <h2>Lorem Ipsum</h2>
 
-  <script>
-    var map = L.map('map').setView([19.0413, -98.2062], 14); // Puebla coordinates
-    var googleSatLayer = L.tileLayer('https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
-      attribution: 'Map data ©2024 Google',
-      maxZoom: 20
-    });
-    googleSatLayer.addTo(map);
+        <h3>Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit</h3>
+        <p>
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis elit massa, sodales non varius et, lobortis sit amet diam. Mauris diam felis, posuere nec leo nec, sodales fringilla metus. Vestibulum ut pretium eros. Nulla sed ex ut ligula imperdiet pharetra. Donec volutpat erat sit amet laoreet suscipit. Aliquam erat volutpat. Praesent feugiat metus a nulla lobortis dapibus. In mollis ultrices mattis. Nulla a orci ac leo commodo venenatis. Orci varius natoque penatibus et magnis dis parturient montes, <strong>nascetur ridiculus mus. Nunc sed elit laoreet, euismod leo a, viverra quam</strong>.
+        </p>
+        <h3>Porcentaje de áreas verdes por cuadrícula</h3>
+        <p>
+          Mauris ac nisi auctor, malesuada sem ac, tincidunt justo. Pellentesque sem magna, laoreet quis ultrices non, auctor sed neque. Proin dui lacus, placerat eget maximus in, tempor vitae risus. Nullam blandit ut mauris et luctus. Nam egestas consequat neque, quis scelerisque elit sollicitudin in. Cras vestibulum vehicula interdum. Vivamus molestie magna sem, sit amet accumsan diam consequat eu. Curabitur sed mauris et lorem dignissim <strong>semper in sit amet orci</strong>. Morbi dolor libero, euismod nec efficitur eu, rutrum nec ipsum. <strong>Suspendisse suscipit in orci</strong> in lobortis. Duis est sem, mattis sed fermentum vitae, gravida placerat lorem. Quisque vehicula lobortis felis ac interdum. Praesent lectus mauris, posuere vel tellus non, egestas pulvinar nulla.
+        </p>
+      </div>
+      <div class="card">
+        <h2>Lorem Ipsum</h2>
 
-    var gridLayer;
-    var currentOpacity = 0.1;  // Initial opacity value from slider
+        <h3>Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit</h3>
+        <p>
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis elit massa, sodales non varius et, lobortis sit amet diam. Mauris diam felis, posuere nec leo nec, sodales fringilla metus. Vestibulum ut pretium eros. Nulla sed ex ut ligula imperdiet pharetra. Donec volutpat erat sit amet laoreet suscipit. Aliquam erat volutpat. Praesent feugiat metus a nulla lobortis dapibus. In mollis ultrices mattis. Nulla a orci ac leo commodo venenatis. Orci varius natoque penatibus et magnis dis parturient montes, <strong>nascetur ridiculus mus. Nunc sed elit laoreet, euismod leo a, viverra quam</strong>.
+        </p>
+        <h3>Porcentaje de áreas verdes por cuadrícula</h3>
+        <p>
+          Mauris ac nisi auctor, malesuada sem ac, tincidunt justo. Pellentesque sem magna, laoreet quis ultrices non, auctor sed neque. Proin dui lacus, placerat eget maximus in, tempor vitae risus. Nullam blandit ut mauris et luctus. Nam egestas consequat neque, quis scelerisque elit sollicitudin in. Cras vestibulum vehicula interdum. Vivamus molestie magna sem, sit amet accumsan diam consequat eu. Curabitur sed mauris et lorem dignissim <strong>semper in sit amet orci</strong>. Morbi dolor libero, euismod nec efficitur eu, rutrum nec ipsum. <strong>Suspendisse suscipit in orci</strong> in lobortis. Duis est sem, mattis sed fermentum vitae, gravida placerat lorem. Quisque vehicula lobortis felis ac interdum. Praesent lectus mauris, posuere vel tellus non, egestas pulvinar nulla.
+        </p>
+      </div>
+    </div>
 
-    // Get the opacity slider element
-    var opacitySlider = document.getElementById('opacityRange');
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
 
-    // Listen for slider value changes
-    opacitySlider.addEventListener('input', function() {
-      currentOpacity = opacitySlider.value / 100;
-      gridLayer.eachLayer(function(layer) {
-        if (layer instanceof L.Rectangle) {
-          layer.setStyle({fillOpacity: currentOpacity});
+    <script>
+      var map = L.map("map").setView([19.0413, -98.2062], 14); // Puebla coordinates
+      var googleSatLayer = L.tileLayer(
+        "https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}",
+        {
+          attribution: "Map data ©2024 Google",
+          maxZoom: 20,
         }
-      });
-    });
+      );
+      googleSatLayer.addTo(map);
 
-    let map2 = L.map('map2').setView([55.664462, 12.585317], 14); //  Copenhague coordinates
-    let googleSatLayer2 = L.tileLayer('https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
-      attribution: 'Map data ©2024 Google',
-      maxZoom: 20
-    });
-    googleSatLayer2.addTo(map2);
+      var gridLayer;
+      var currentOpacity = 0.1; // Initial opacity value from slider
 
-    var gridLayer2;
-    var currentOpacity2 = 0.1;  // Initial opacity value from slider
+      // Get the opacity slider element
+      var opacitySlider = document.getElementById("opacityRange");
 
-    // Get the opacity slider element
-    var opacitySlider2 = document.getElementById('opacityRange');
-
-    // Listen for slider value changes
-    opacitySlider2.addEventListener('input', function() {
-      currentOpacity2 = opacitySlider2.value / 100;
-      gridLayer2.eachLayer(function(layer) {
-        if (layer instanceof L.Rectangle) {
-          layer.setStyle({fillOpacity: currentOpacity2});
-        }
-      });
-    });
-
-    // Function to draw grid
-    function addGrid() {
-      gridLayer = L.layerGroup();
-      var zoom = 13
-      var step = (zoom >= 17) ? 0.001 : (zoom >= 15) ? 0.005 : 0.009;
-      //var step = 0.01;
-
-      var bounds = map.getBounds();
-      var southWest = bounds.getSouthWest();
-      var northEast = bounds.getNorthEast();
-
-      for (var lat = Math.floor(southWest.lat / step) * step; lat < northEast.lat; lat += step) {
-        for (var lng = Math.floor(southWest.lng / step) * step; lng < northEast.lng; lng += step) {
-          var rect = L.rectangle([[lat, lng], [lat + step, lng + step]], {
-            color: "#ff7800", weight: 1, fillOpacity: currentOpacity
-          });
-          rect.addTo(gridLayer);
-        }
-      }
-      gridLayer.addTo(map);
-    }
-
-    function addGrid2() {
-      gridLayer2 = L.layerGroup();
-      var zoom = 13
-      var step = (zoom >= 17) ? 0.001 : (zoom >= 15) ? 0.005 : 0.009;
-      //var step = 0.01;
-
-      var bounds = map2.getBounds();
-      var southWest = bounds.getSouthWest();
-      var northEast = bounds.getNorthEast();
-
-      for (var lat = Math.floor(southWest.lat / step) * step; lat < northEast.lat; lat += step) {
-        for (var lng = Math.floor(southWest.lng / step) * step; lng < northEast.lng; lng += step) {
-          var rect = L.rectangle([[lat, lng], [lat + step, lng + step]], {
-            color: "#ff7800", weight: 1, fillOpacity: currentOpacity
-          });
-          rect.addTo(gridLayer2);
-        }
-      }
-      gridLayer2.addTo(map2);
-    }
-
-    // Function to get color based on vegetation percentage
-    function getVegetationColor(porcentaje) {
-      return porcentaje > 50 ? 'green' :
-             porcentaje > 30 ? 'yellowgreen' :
-             porcentaje > 20 ? 'yellow' :
-             porcentaje > 10 ? 'orange' :
-             'red';
-    }
-
-    // Function to analyze each grid cell
-    function analyzeGrid() {
-      var rectangles = [];
-      gridLayer.eachLayer(function(layer) {
-        if (layer instanceof L.Rectangle) {
-          rectangles.push(layer);
-        }
-      });
-
-      rectangles.forEach(function(rect) {
-        var bounds = rect.getBounds();
-        var center = bounds.getCenter();
-        var lat = center.lat;
-        var lng = center.lng;
-
-        fetch('/process_tile', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            lat: lat,
-            lng: lng,
-            zoom: 13
-          })
-        })
-        .then(response => response.json())
-        .then(data => {
-          var porcentaje = data.porcentaje_vegetacion;
-
-          // Set the rectangle color and opacity based on vegetation percentage
-          rect.setStyle({
-            color: getVegetationColor(porcentaje),
-            fillOpacity: currentOpacity
-          });
-
-          // Add the percentage label on the grid
-          var percentageLabel = L.marker(rect.getBounds().getCenter(), {
-            icon: L.divIcon({
-              className: 'percentage-label',
-              html: `${porcentaje.toFixed(2)}%`
-            })
-          }).addTo(gridLayer);
-        })
-        .catch(error => {
-          console.error('Error al analizar la cuadrícula:', error);
+      // Listen for slider value changes
+      opacitySlider.addEventListener("input", function () {
+        currentOpacity = opacitySlider.value / 100;
+        gridLayer.eachLayer(function (layer) {
+          if (layer instanceof L.Rectangle) {
+            layer.setStyle({ fillOpacity: currentOpacity });
+          }
         });
       });
-    }
 
-    function analyzeGrid2() {
-      var rectangles = [];
-      gridLayer2.eachLayer(function(layer) {
-        if (layer instanceof L.Rectangle) {
-          rectangles.push(layer);
+      // Function to draw grid
+      function addGrid() {
+        gridLayer = L.layerGroup();
+        var zoom = 13;
+        var step = zoom >= 17 ? 0.001 : zoom >= 15 ? 0.005 : 0.009;
+        //var step = 0.01;
+
+        var bounds = map.getBounds();
+        var southWest = bounds.getSouthWest();
+        var northEast = bounds.getNorthEast();
+
+        for (
+          var lat = Math.floor(southWest.lat / step) * step;
+          lat < northEast.lat;
+          lat += step
+        ) {
+          for (
+            var lng = Math.floor(southWest.lng / step) * step;
+            lng < northEast.lng;
+            lng += step
+          ) {
+            var rect = L.rectangle(
+              [
+                [lat, lng],
+                [lat + step, lng + step],
+              ],
+              {
+                color: "#ff7800",
+                weight: 1,
+                fillOpacity: currentOpacity,
+              }
+            );
+            rect.addTo(gridLayer);
+          }
         }
-      });
+        gridLayer.addTo(map);
+      }
 
-      rectangles.forEach(function(rect) {
-        var bounds = rect.getBounds();
-        var center = bounds.getCenter();
-        var lat = center.lat;
-        var lng = center.lng;
+      // Function to get color based on vegetation percentage
+      function getVegetationColor(porcentaje) {
+        return porcentaje > 50
+          ? "green"
+          : porcentaje > 30
+          ? "yellowgreen"
+          : porcentaje > 20
+          ? "yellow"
+          : porcentaje > 10
+          ? "orange"
+          : "red";
+      }
 
-        fetch('/process_tile', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            lat: lat,
-            lng: lng,
-            zoom: 13
-          })
-        })
-        .then(response => response.json())
-        .then(data => {
-          var porcentaje = data.porcentaje_vegetacion;
-
-          // Set the rectangle color and opacity based on vegetation percentage
-          rect.setStyle({
-            color: getVegetationColor(porcentaje),
-            fillOpacity: currentOpacity
-          });
-
-          // Add the percentage label on the grid
-          var percentageLabel = L.marker(rect.getBounds().getCenter(), {
-            icon: L.divIcon({
-              className: 'percentage-label',
-              html: `${porcentaje.toFixed(2)}%`
-            })
-          }).addTo(gridLayer2);
-        })
-        .catch(error => {
-          console.error('Error al analizar la cuadrícula:', error);
+      // Function to analyze each grid cell
+      function analyzeGrid() {
+        var rectangles = [];
+        gridLayer.eachLayer(function (layer) {
+          if (layer instanceof L.Rectangle) {
+            rectangles.push(layer);
+          }
         });
-      });
-    }
 
-    // Add grid to map
-    addGrid();
-    addGrid2();
+        rectangles.forEach(function (rect) {
+          var bounds = rect.getBounds();
+          var center = bounds.getCenter();
+          var lat = center.lat;
+          var lng = center.lng;
 
-    // Analyze grid on button click
-    document.getElementById('analyze-grid').addEventListener('click',()=>{
-      analyzeGrid();
-      analyzeGrid2();
-    } );
+          fetch("/process_tile", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              lat: lat,
+              lng: lng,
+              zoom: 13,
+            }),
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              var porcentaje = data.porcentaje_vegetacion;
 
-    // Redraw grid on map movement or zoom
-    map.on('moveend', function() {
-      map.removeLayer(gridLayer);
+              // Set the rectangle color and opacity based on vegetation percentage
+              rect.setStyle({
+                color: getVegetationColor(porcentaje),
+                fillOpacity: currentOpacity,
+              });
+
+              // Add the percentage label on the grid
+              var percentageLabel = L.marker(rect.getBounds().getCenter(), {
+                icon: L.divIcon({
+                  className: "percentage-label",
+                  html: `${porcentaje.toFixed(2)}%`,
+                }),
+              }).addTo(gridLayer);
+            })
+            .catch((error) => {
+              console.error("Error al analizar la cuadrícula:", error);
+            });
+        });
+      }
+      // Add grid to map
       addGrid();
-    });
-    map2.on('moveend', function() {
-      map2.removeLayer(gridLayer2);
-      addGrid2();
-    });
-  </script>
-</body>
+
+      // Analyze grid on button click
+      document.getElementById("analyze-grid").addEventListener("click", () => {
+        analyzeGrid();
+      });
+
+      // Redraw grid on map movement or zoom
+      map.on("moveend", function () {
+        map.removeLayer(gridLayer);
+        addGrid();
+      });
+    </script>
+  </body>
 </html>
