@@ -98,7 +98,17 @@ def calcular_porcentaje_vegetacion(image_path):
     vegetation_pixels = np.sum(mask > 0)
     porcentaje_vegetacion = (vegetation_pixels / total_pixels) * 100
 
-    return porcentaje_vegetacion
+    green_lower = np.array([54, 30, 0])
+    green_upper = np.array([170, 255, 255])
+    img_hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+    mask = cv2.inRange(img_hsv, green_lower, green_upper)
+    green_extract = cv2.bitwise_and(image, image, mask=mask)
+    total_pixels = image.shape[0] * image.shape[1] 
+    green_pixels = cv2.countNonZero(mask)  
+    green_percentage = (green_pixels / total_pixels) * 100 
+
+
+    return green_percentage
 
 # Endpoint para procesar los tiles de las cuadrículas
 @app.route('/process_tile', methods=['POST'])
@@ -107,7 +117,7 @@ def process_tile():
         data = request.json
         lat = data['lat']
         lng = data['lng']
-        zoom = data['zoom']
+        zoom = 15#data['zoom']
 
         # Convertir a coordenadas de tile
         x, y = latlng_to_tile(lat, lng, zoom)
