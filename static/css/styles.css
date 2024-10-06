@@ -12,6 +12,7 @@ body {
   display: flex;  /* Activate flexbox */
   justify-content: space-between;  /* Space between map and controls */
   padding: 20px;
+  width: 100%;
 }
 
 #map {
@@ -20,6 +21,7 @@ body {
   margin-right: 20px;  /* Add space between map and controls */
   border: 2px solid #333;
 }
+
 
 #controls {
   width: 25%;  /* 25% of the width for controls */

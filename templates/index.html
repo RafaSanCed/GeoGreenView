@@ -30,6 +30,14 @@
   margin-right: 20px;  /* Add space between map and controls */
   border: 2px solid #333;
 }
+#map2 {
+  margin-top: 1.5rem;
+  height: 500px;
+  width: 75%;  /* 75% of the width for the map */
+  margin-right: 20px;  /* Add space between map and controls */
+  border: 2px solid #333;
+}
+
 
 #controls {
   width: 25%;  /* 25% of the width for controls */
@@ -37,7 +45,9 @@
   padding: 10px;
   box-sizing: border-box;
 }
-
+.w-full {
+  width: 100%;
+}
 button {
   padding: 10px 20px;
   background-color: #4CAF50;
@@ -83,10 +93,14 @@ input[type="range"] {
   </style>
 </head>
 <body>
-  <h1 style="text-align: center;">Análisis del porcentaje de áreas verdes en la ciudad de Puebla, México</h1>
+  <h1 style="text-align: center;">Análisis del porcentaje de áreas verdes en la ciudad de Puebla, México y su contraste Copenhague, Dinamarca.</h1>
 
     <div class = "container">
-      <div id="map"></div>
+      <div class="w-full">
+
+        <div id="map"></div>
+        <div id="map2"></div>
+      </div>
       <div id="controls">
         <button id="analyze-grid">Analizar Cuadrículas</button>
     
@@ -104,10 +118,7 @@ input[type="range"] {
         <i style="background: green;"></i> Alto (50-100%)<br>
       </div>
       </div>
-    </div>
-
-  
-  
+    </div>  
   
   <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
 
@@ -135,6 +146,29 @@ input[type="range"] {
       });
     });
 
+    let map2 = L.map('map2').setView([55.664462, 12.585317], 14); //  Copenhague coordinates
+    let googleSatLayer2 = L.tileLayer('https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+      attribution: 'Map data ©2024 Google',
+      maxZoom: 20
+    });
+    googleSatLayer2.addTo(map2);
+
+    var gridLayer2;
+    var currentOpacity2 = 0.1;  // Initial opacity value from slider
+
+    // Get the opacity slider element
+    var opacitySlider2 = document.getElementById('opacityRange');
+
+    // Listen for slider value changes
+    opacitySlider2.addEventListener('input', function() {
+      currentOpacity2 = opacitySlider2.value / 100;
+      gridLayer2.eachLayer(function(layer) {
+        if (layer instanceof L.Rectangle) {
+          layer.setStyle({fillOpacity: currentOpacity2});
+        }
+      });
+    });
+
     // Function to draw grid
     function addGrid() {
       gridLayer = L.layerGroup();
@@ -155,6 +189,27 @@ input[type="range"] {
         }
       }
       gridLayer.addTo(map);
+    }
+
+    function addGrid2() {
+      gridLayer2 = L.layerGroup();
+      var zoom = 13
+      var step = (zoom >= 17) ? 0.001 : (zoom >= 15) ? 0.005 : 0.009;
+      //var step = 0.01;
+
+      var bounds = map2.getBounds();
+      var southWest = bounds.getSouthWest();
+      var northEast = bounds.getNorthEast();
+
+      for (var lat = Math.floor(southWest.lat / step) * step; lat < northEast.lat; lat += step) {
+        for (var lng = Math.floor(southWest.lng / step) * step; lng < northEast.lng; lng += step) {
+          var rect = L.rectangle([[lat, lng], [lat + step, lng + step]], {
+            color: "#ff7800", weight: 1, fillOpacity: currentOpacity
+          });
+          rect.addTo(gridLayer2);
+        }
+      }
+      gridLayer2.addTo(map2);
     }
 
     // Function to get color based on vegetation percentage
@@ -216,16 +271,73 @@ input[type="range"] {
       });
     }
 
+    function analyzeGrid2() {
+      var rectangles = [];
+      gridLayer2.eachLayer(function(layer) {
+        if (layer instanceof L.Rectangle) {
+          rectangles.push(layer);
+        }
+      });
+
+      rectangles.forEach(function(rect) {
+        var bounds = rect.getBounds();
+        var center = bounds.getCenter();
+        var lat = center.lat;
+        var lng = center.lng;
+
+        fetch('/process_tile', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            lat: lat,
+            lng: lng,
+            zoom: 13
+          })
+        })
+        .then(response => response.json())
+        .then(data => {
+          var porcentaje = data.porcentaje_vegetacion;
+
+          // Set the rectangle color and opacity based on vegetation percentage
+          rect.setStyle({
+            color: getVegetationColor(porcentaje),
+            fillOpacity: currentOpacity
+          });
+
+          // Add the percentage label on the grid
+          var percentageLabel = L.marker(rect.getBounds().getCenter(), {
+            icon: L.divIcon({
+              className: 'percentage-label',
+              html: `${porcentaje.toFixed(2)}%`
+            })
+          }).addTo(gridLayer2);
+        })
+        .catch(error => {
+          console.error('Error al analizar la cuadrícula:', error);
+        });
+      });
+    }
+
     // Add grid to map
     addGrid();
+    addGrid2();
 
     // Analyze grid on button click
-    document.getElementById('analyze-grid').addEventListener('click', analyzeGrid);
+    document.getElementById('analyze-grid').addEventListener('click',()=>{
+      analyzeGrid();
+      analyzeGrid2();
+    } );
 
     // Redraw grid on map movement or zoom
     map.on('moveend', function() {
       map.removeLayer(gridLayer);
       addGrid();
+    });
+    map2.on('moveend', function() {
+      map2.removeLayer(gridLayer2);
+      addGrid2();
     });
   </script>
 </body>
