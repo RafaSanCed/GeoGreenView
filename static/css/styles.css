@@ -66,3 +66,12 @@ input[type="range"] {
   margin-right: 8px;
   opacity: 0.7;
 }
+
+.simple-bar {
+  background-color: #3498db; /* Color azul */
+  color: white; /* Cambiamos el color del texto a blanco para contraste */
+  padding-top: 10px;
+  padding-bottom: 10px;
+  text-align: center;
+  border-bottom: 1px solid #d3d3d3;
+}
