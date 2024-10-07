@@ -16,11 +16,14 @@
   <li><strong>Cuadrículas personalizadas:</strong> El usuario puede dibujar cuadrículas sobre la zona que desea analizar.</li>
   <li><strong>Análisis de vegetación:</strong> El sistema analiza las cuadrículas descargando imágenes satelitales de Google Maps y determina el porcentaje de zonas verdes.</li>
   <li><strong>Colores de clasificación:</strong>
-    <ul>
-      <li><strong>Verde:</strong> Alta vegetación (por encima del 20% de área verde).</li>
-      <li><strong>Amarillo:</strong> Vegetación moderada (entre 10% y 20%).</li>
-      <li><strong>Rojo:</strong> Poca o nula vegetación (por debajo del 10%).</li>
-    </ul>
+<ul>
+  <li><strong>Rojo:</strong> Baja vegetación (0-10% de área verde).</li>
+  <li><strong>Naranja:</strong> Vegetación medio-baja (10-20% de área verde).</li>
+  <li><strong>Amarillo:</strong> Vegetación moderada (20-30% de área verde).</li>
+  <li><strong>Amarillo-verde:</strong> Vegetación medio-alta (30-50% de área verde).</li>
+  <li><strong>Verde:</strong> Alta vegetación (50-100% de área verde).</li>
+</ul>
+
   </li>
 </ul>
 
@@ -106,14 +109,26 @@ cd GeoGreenView</code></pre>
 <pre><code>GeoGreenView/
 │
 ├── app.py              # Código principal de Flask
-├── static/             # Archivos CSS/JS del frontend
+├── static/             
+│   └── css/
+       └── styles.css      # Archivos CSS del frontend
 ├── templates/
 │   └── index.html      # Página principal con el mapa interactivo
 ├── images/             # Carpeta para almacenar las imágenes descargadas
-├── .gitignore          # Archivo para excluir el venv y las imágenes
-├── requirements.txt    # Lista de dependencias del proyecto
-└── README.md           # Este archivo README
+├── docs/               
+│   └── presentation.pptx  # Archivo de presentación
+├── .gitignore          
+├── requirements.txt    
+└── README.md           
 </code></pre>
+
+## Presentación del Proyecto
+
+Para entender mejor el funcionamiento, las características y el impacto de **GeoGreenView**, hemos incluido una presentación de PowerPoint que explica detalladamente cómo funciona el sistema, su arquitectura, y sus beneficios. Esta presentación es ideal para mostrarla en reuniones o eventos de divulgación.
+
+### Cómo acceder a la presentación:
+
+La presentación se encuentra en la carpeta `docs/` con el nombre `GeoGreenView.pptx`. Puedes descargarla directamente desde el repositorio y abrirla con cualquier visor de PowerPoint.
 
 <h2>Contribuciones</h2>
 <p>Este proyecto está abierto a contribuciones. Si deseas agregar nuevas funcionalidades, mejorar el código o arreglar errores, siéntete libre de hacer un <code>fork</code> del repositorio y enviar un Pull Request.</p>
